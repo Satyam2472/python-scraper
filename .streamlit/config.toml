@@ -1,7 +1,5 @@
 [theme]
 
-[server]
-headless = true
 
 # Primary accent for interactive elements
 primaryColor = '#7792E3'

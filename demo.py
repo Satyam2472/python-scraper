@@ -1,9 +1,9 @@
 import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from webdriver_manager.firefox import GeckoDriverManager
 from time import sleep
 import pandas as pd
 from io import BytesIO
@@ -27,21 +27,21 @@ with st.container():
         if start_scraping:
             st.write(f'Starting to scrape {search_query} for {page_count} pages...')
 
-            # Set up Chrome options for headless browsing
-            chrome_options = Options()
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--disable-gpu')
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--disable-dev-shm-usage')
+            # Set up Firefox options for headless browsing
+            firefox_options = Options()
+            firefox_options.add_argument('--headless')
+            firefox_options.add_argument('--disable-gpu')
+            firefox_options.add_argument('--no-sandbox')
+            firefox_options.add_argument('--disable-dev-shm-usage')
 
             # Use webdriver_manager to handle the driver installation
             @st.cache_resource
             def get_driver():
-                return webdriver.Chrome(
+                return webdriver.Firefox(
                     service=Service(
-                        ChromeDriverManager().install()
+                        GeckoDriverManager().install()
                     ),
-                    options=chrome_options,
+                    options=firefox_options,
                 )
 
             # Initialize the WebDriver
