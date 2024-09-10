@@ -2,37 +2,17 @@ import streamlit as st
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
 from time import sleep
 import pandas as pd
 from io import BytesIO
-from selenium.webdriver.chrome.service import Service
-import os
-
-
-# Install Chromium and ChromeDriver
-os.system('apt-get update')
-os.system('apt install -y chromium-browser')
-os.system('apt install -y chromium-chromedriver')
-
-# Set the ChromeDriver and Chromium paths
-chrome_options = Options()
-chrome_options.add_argument('--headless')
-chrome_options.add_argument('--disable-gpu')
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--disable-dev-shm-usage')
-chrome_options.binary_location = "/usr/bin/chromium-browser"
-
-# Initialize the WebDriver with the path to ChromeDriver
-service = Service("/usr/bin/chromedriver")
-
 
 # Streamlit UI
-# st.title('Flipkart Product Scraper')
 st.set_page_config(page_title="Flipkart Product Scraper by NexTen Brands", page_icon=":moneybag:", layout="wide")
 
 with st.container():
-    # st.image("nexten.png", width=100)  # Nexten Logo
-
     st.title('Flipkart Product Scraper by NexTen Brands')
 
 with st.container():
@@ -46,28 +26,37 @@ with st.container():
         start_scraping = st.button('Start Scraping')
 
         if start_scraping:
-            # Display scraping status
             st.write(f'Starting to scrape {search_query} for {page_count} pages...')
 
             # Set up Chrome options for headless browsing
-            # chrome_options = Options()
-            # chrome_options.add_argument('--headless')
-            # chrome_options.add_argument('--disable-gpu')
-            # chrome_options.add_argument('--no-sandbox')
-            # chrome_options.add_argument('--disable-dev-shm-usage')
+            chrome_options = Options()
+            chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--disable-gpu')
+            chrome_options.add_argument('--no-sandbox')
+            chrome_options.add_argument('--disable-dev-shm-usage')
 
-            # Initialize the browser in headless mode
-            browser = webdriver.Chrome(service=service, options=chrome_options)
+            # Use webdriver_manager to handle the driver installation
+            @st.cache_resource
+            def get_driver():
+                return webdriver.Chrome(
+                    service=Service(
+                        ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+                    ),
+                    options=chrome_options,
+                )
+
+            # Initialize the WebDriver
+            browser = get_driver()
 
             # Load the Flipkart webpage
             browser.get('https://www.flipkart.com/')
-            
+
             # Close any initial popups (like login popups)
             try:
                 close_popup = browser.find_element(By.CSS_SELECTOR, 'button._2KpZ6l._2doB4z')
                 close_popup.click()
             except:
-                pass  # No popup found
+                pass
 
             # Get the input elements
             input_search = browser.find_element(By.CLASS_NAME, 'Pke_EE')
@@ -87,11 +76,11 @@ with st.container():
             products_qty = []
 
             # Loop through multiple pages based on user input
-            for i in range(page_count):  # Use the page_count from Streamlit input
+            for i in range(page_count):
                 st.write(f'Scraping page {i+1}...')
                 sleep(2)
                 
-                # Scrape all product titles, prices, and ratings on the current page
+                # Scrape product details on the current page
                 titles = browser.find_elements(By.CLASS_NAME, "wjcEIp")
                 prices = browser.find_elements(By.CLASS_NAME, "Nx9bqj")
                 MRPprices = browser.find_elements(By.CLASS_NAME, "yRaY8j")
@@ -99,7 +88,7 @@ with st.container():
                 rating_counts = browser.find_elements(By.CLASS_NAME, "Wphh3N")
                 qtys = browser.find_elements(By.CLASS_NAME, "NqpwHC")
 
-                # Loop through the extracted details and add them to the lists
+                # Append the details to the respective lists
                 for title, price, mrp, rating, rating_count, qty in zip(titles, prices, MRPprices, ratings, rating_counts, qtys):
                     products_title.append(title.get_attribute('title'))
                     products_price.append(price.text)
@@ -138,16 +127,16 @@ with st.container():
             output = BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 data.to_excel(writer, index=False)
-                writer.close()  # Close the writer to finalize the file
+                writer.close()
 
             # Download button for the data
             st.download_button(
                 label="Download data as Excel",
                 data=output.getvalue(),
-                file_name='flipkart_{search_query}_data.xlsx',
+                file_name=f'flipkart_{search_query}_data.xlsx',
                 mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
-        
+
         with right_column:
             st.image('nexten_logo_2.jpeg')
             st.image('background.png')  # Display an image from a file
