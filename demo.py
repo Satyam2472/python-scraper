@@ -5,6 +5,25 @@ from selenium.webdriver.chrome.options import Options
 from time import sleep
 import pandas as pd
 from io import BytesIO
+from selenium.webdriver.chrome.service import Service
+import os
+
+
+# Install Chromium and ChromeDriver
+os.system('apt-get update')
+os.system('apt install -y chromium-browser')
+os.system('apt install -y chromium-chromedriver')
+
+# Set the ChromeDriver and Chromium paths
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--disable-gpu')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
+chrome_options.binary_location = "/usr/bin/chromium-browser"
+
+# Initialize the WebDriver with the path to ChromeDriver
+service = Service("/usr/bin/chromedriver")
 
 
 # Streamlit UI
@@ -31,14 +50,14 @@ with st.container():
             st.write(f'Starting to scrape {search_query} for {page_count} pages...')
 
             # Set up Chrome options for headless browsing
-            chrome_options = Options()
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--disable-gpu')
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--disable-dev-shm-usage')
+            # chrome_options = Options()
+            # chrome_options.add_argument('--headless')
+            # chrome_options.add_argument('--disable-gpu')
+            # chrome_options.add_argument('--no-sandbox')
+            # chrome_options.add_argument('--disable-dev-shm-usage')
 
             # Initialize the browser in headless mode
-            browser = webdriver.Chrome(options=chrome_options)
+            browser = webdriver.Chrome(service=service, options=chrome_options)
 
             # Load the Flipkart webpage
             browser.get('https://www.flipkart.com/')
