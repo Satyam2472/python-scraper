@@ -62,6 +62,7 @@ with st.container():
             # Initialize lists to store product details
             products_title = []
             products_price = []
+            products_mrp = []
             products_rating = []
             products_rating_count = []
             products_qty = []
@@ -74,14 +75,16 @@ with st.container():
                 # Scrape all product titles, prices, and ratings on the current page
                 titles = browser.find_elements(By.CLASS_NAME, "wjcEIp")
                 prices = browser.find_elements(By.CLASS_NAME, "Nx9bqj")
+                MRPprices = browser.find_elements(By.CLASS_NAME, "yRaY8j")
                 ratings = browser.find_elements(By.CLASS_NAME, "XQDdHH")
                 rating_counts = browser.find_elements(By.CLASS_NAME, "Wphh3N")
                 qtys = browser.find_elements(By.CLASS_NAME, "NqpwHC")
 
                 # Loop through the extracted details and add them to the lists
-                for title, price, rating, rating_count, qty in zip(titles, prices, ratings, rating_counts, qtys):
+                for title, price, mrp, rating, rating_count, qty in zip(titles, prices, MRPprices, ratings, rating_counts, qtys):
                     products_title.append(title.get_attribute('title'))
                     products_price.append(price.text)
+                    products_mrp.append(mrp.text)
                     products_rating.append(rating.text)
                     products_rating_count.append(rating_count.text)
                     products_qty.append(qty.text)
@@ -101,7 +104,8 @@ with st.container():
             # Save the scraped data into a DataFrame
             data = pd.DataFrame({
                 'Title': products_title,
-                'Price': products_price,
+                'Selling Price': products_price,
+                'MRP': products_mrp,
                 'Quantity': products_qty,
                 'Rating': products_rating,
                 'Rating count': products_rating_count
