@@ -4,12 +4,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
 from time import sleep
 import pandas as pd
 from io import BytesIO
-import os
-
 
 # Streamlit UI
 st.set_page_config(page_title="Flipkart Product Scraper by NexTen Brands", page_icon=":moneybag:", layout="wide")
@@ -30,11 +27,6 @@ with st.container():
         if start_scraping:
             st.write(f'Starting to scrape {search_query} for {page_count} pages...')
 
-            os.system('apt-get update')
-            os.system('apt-get install -y chromium-browser')
-            os.system('apt-get install -y chromium-chromedriver')
-
-            
             # Set up Chrome options for headless browsing
             chrome_options = Options()
             chrome_options.add_argument('--headless')
@@ -47,7 +39,7 @@ with st.container():
             def get_driver():
                 return webdriver.Chrome(
                     service=Service(
-                        ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+                        ChromeDriverManager().install()
                     ),
                     options=chrome_options,
                 )
